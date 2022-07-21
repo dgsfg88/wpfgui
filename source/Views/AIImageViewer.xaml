@@ -1,0 +1,29 @@
+﻿<Control x:Class="wpfgui.Views.AIImageViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:wpfgui.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+	<Control.Template>
+		<ControlTemplate>
+			<ScrollViewer x:Name="ScrollViewer_PART">
+				<!--The HighQuality works good without zoom, but when zooming it in mix adiacent pixels-->
+				<Grid x:Name="MainGrid_PART" RenderOptions.BitmapScalingMode="NearestNeighbor">
+					<Image Stretch="None" x:Name="BackgroundImage_PART">
+					</Image>
+					<Image Stretch="None" x:Name="ForegroundImage_PART">
+					</Image>
+					<ItemsControl x:Name="ShapesContainer_PART">
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<Canvas></Canvas>
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+					</ItemsControl>
+				</Grid>
+			</ScrollViewer>
+		</ControlTemplate>
+	</Control.Template>
+</Control>
