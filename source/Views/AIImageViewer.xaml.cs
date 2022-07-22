@@ -23,6 +23,9 @@ namespace wpfgui.Views
 	/// </summary>
 	public partial class AIImageViewer : Control
 	{
+		/// <summary>
+		/// Main image showed by viewer
+		/// </summary>
 		public BitmapSource Source
 		{
 			get { return (BitmapSource)GetValue(SourceProperty); }
@@ -33,7 +36,9 @@ namespace wpfgui.Views
 		public static readonly DependencyProperty SourceProperty =
 			DependencyProperty.Register(nameof(Source), typeof(BitmapSource), typeof(AIImageViewer), 
 				new PropertyMetadata(null));
-
+		/// <summary>
+		/// Zoom value applied to the viewer, where 1.0 is the viewer size
+		/// </summary>
 		public double ZoomValue
 		{
 			get { return (double)GetValue(ZoomValueProperty); }
@@ -43,7 +48,9 @@ namespace wpfgui.Views
 		// Using a DependencyProperty as the backing store for ZoomValue.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty ZoomValueProperty =
 			DependencyProperty.Register(nameof(ZoomValue), typeof(double), typeof(AIImageViewer), new PropertyMetadata(1.0));
-
+		/// <summary>
+		/// List of shapes showed over the <see cref="Source"/> image and that share the same coordinate system
+		/// </summary>
 		public ObservableCollection<Shape> Shapes
 		{
 			get { return (ObservableCollection<Shape>)GetValue(ShapesProperty); }
@@ -54,8 +61,9 @@ namespace wpfgui.Views
 		public static readonly DependencyProperty ShapesProperty =
 			DependencyProperty.Register(nameof(Shapes), typeof(ObservableCollection<Shape>), typeof(AIImageViewer), 
 				new PropertyMetadata(null));
-
-
+		/// <summary>
+		/// List of drawing showed over the <see cref="Source"/> image and that share the same coordinate system
+		/// </summary>
 		public DrawingCollection OverlayDrawings
 		{
 			get { return (DrawingCollection)GetValue(OverlayDrawingsProperty); }
