@@ -11,9 +11,17 @@
 			<ScrollViewer x:Name="ScrollViewer_PART">
 				<!--The HighQuality works good without zoom, but when zooming it in mix adiacent pixels-->
 				<Grid x:Name="MainGrid_PART" RenderOptions.BitmapScalingMode="NearestNeighbor">
-					<Image Stretch="None" x:Name="BackgroundImage_PART">
-					</Image>
-					<Image Stretch="None" x:Name="ForegroundImage_PART">
+					<Image Stretch="None" >
+						<Image.Source>
+							<DrawingImage>
+								<DrawingImage.Drawing>
+									<DrawingGroup>
+										<ImageDrawing x:Name="BackgroundImage_PART"/>
+										<DrawingGroup x:Name="ForegroundImage_PART"/>
+									</DrawingGroup>
+								</DrawingImage.Drawing>
+							</DrawingImage>
+						</Image.Source>
 					</Image>
 					<ItemsControl x:Name="ShapesContainer_PART">
 						<ItemsControl.ItemsPanel>

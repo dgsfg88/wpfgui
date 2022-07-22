@@ -55,11 +55,24 @@ namespace wpfgui.Views
 			DependencyProperty.Register(nameof(Shapes), typeof(ObservableCollection<Shape>), typeof(AIImageViewer), 
 				new PropertyMetadata(null));
 
+
+		public DrawingCollection OverlayDrawings
+		{
+			get { return (DrawingCollection)GetValue(OverlayDrawingsProperty); }
+			set { SetValue(OverlayDrawingsProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for OverlayDrawings.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty OverlayDrawingsProperty =
+			DependencyProperty.Register(nameof(OverlayDrawings), typeof(DrawingCollection), typeof(AIImageViewer), new PropertyMetadata(null));
+
+
 		public AIImageViewer()
 		{
 			SetValue(ScrollViewer.HorizontalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
 			SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
 
+			OverlayDrawings = new DrawingCollection();
 			Shapes = new ObservableCollection<Shape>();
 
 			InitializeComponent();
@@ -111,17 +124,38 @@ namespace wpfgui.Views
 			mainGrid.LayoutTransform = zoomTransform;
 
 			//Main Image Binding
-			var bkImage = (Image)Template.FindName("BackgroundImage_PART", this);
-			bkImage.SetBinding(Image.SourceProperty, new Binding(nameof(Source))
+			var bkImage = (ImageDrawing)Template.FindName("BackgroundImage_PART", this);
+			//Show the image
+			BindingOperations.SetBinding(bkImage, ImageDrawing.ImageSourceProperty, new Binding(nameof(Source))
 			{
 				Source = this,
 				Mode = BindingMode.OneWay
+			});
+			//Link the drawing area with the image size
+			BindingOperations.SetBinding(bkImage, ImageDrawing.RectProperty, new Binding(nameof(Source))
+			{
+				Source = this,
+				Mode = BindingMode.OneWay,
+				Converter = CallbackConveter.InitValueConverter(GetDrawingRect, null)
 			});
 			//Get the shapes container
 			var shapesContainer = GetTemplateChild("ShapesContainer_PART") as ItemsControl;
 			//Links the shapes with their container
 			shapesContainer.SetBinding(ItemsControl.ItemsSourceProperty, 
 				new Binding(nameof(Shapes)) { Source = this });
+			//Get the foreground image
+			var foregroundImage = GetTemplateChild("ForegroundImage_PART") as DrawingGroup;
+			BindingOperations.SetBinding(foregroundImage, DrawingGroup.ChildrenProperty, 
+				new Binding(nameof(OverlayDrawings)) { Source = this });
+		}
+
+		private object GetDrawingRect(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value is BitmapSource image)
+			{
+				return new Rect(0, 0, image.PixelWidth, image.PixelHeight);
+			}
+			return DependencyProperty.UnsetValue;
 		}
 
 		private object checkNullInput(object value, Type targetType, object parameter, CultureInfo culture)
