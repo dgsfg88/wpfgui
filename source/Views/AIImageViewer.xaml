@@ -7,8 +7,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 	<Control.Template>
-		<ControlTemplate>
-			<ScrollViewer x:Name="ScrollViewer_PART">
+		<ControlTemplate TargetType="{x:Type Control}">
+			<local:AIScrollViewer x:Name="ScrollViewer_PART">
 				<!--The HighQuality works good without zoom, but when zooming it in mix adiacent pixels-->
 				<Grid x:Name="MainGrid_PART" RenderOptions.BitmapScalingMode="NearestNeighbor"
 					  ClipToBounds="True">
@@ -32,7 +32,7 @@
 						</ItemsControl.ItemsPanel>
 					</ItemsControl>
 				</Grid>
-			</ScrollViewer>
+			</local:AIScrollViewer>
 		</ControlTemplate>
 	</Control.Template>
 </Control>
