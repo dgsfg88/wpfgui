@@ -109,6 +109,8 @@ namespace wpfgui.Views
 				Converter = CallbackConveter.InitValueConverter(checkNullInput, null)
 			});
 
+			mainGrid.MouseWheel += OnMainGridMouseWheel;
+
 			var sizeRatioConv = CallbackConveter.InitMultiValueConverter(getScale, null);
 			ScaleTransform zoomTransform = new ScaleTransform();
 			BindingOperations.SetBinding(zoomTransform, ScaleTransform.ScaleXProperty,
@@ -155,6 +157,16 @@ namespace wpfgui.Views
 			var foregroundImage = GetTemplateChild("ForegroundImage_PART") as DrawingGroup;
 			BindingOperations.SetBinding(foregroundImage, DrawingGroup.ChildrenProperty, 
 				new Binding(nameof(OverlayDrawings)) { Source = this });
+		}
+
+		private void OnMainGridMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			double change = e.Delta / 1200.0;
+
+			if (ZoomValue + change > 1)
+				ZoomValue += change;
+			else
+				ZoomValue = 1;
 		}
 
 		private object GetDrawingRect(object value, Type targetType, object parameter, CultureInfo culture)
