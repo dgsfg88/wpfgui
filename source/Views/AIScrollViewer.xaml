@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 	<ContentControl.Template>
-		<ControlTemplate>
+		<ControlTemplate TargetType="{x:Type ContentControl}">
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="*"/>
@@ -17,13 +17,23 @@
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="auto"/>
 				</Grid.ColumnDefinitions>
-				<Canvas Initialized="CanvasInitialized" ClipToBounds="True">
-					<ContentPresenter Initialized="ContentPresenterInizilized"/>
+				<Canvas x:Name="PART_ScrollViewerCanvas" ClipToBounds="True">
+					<ContentPresenter x:Name="PART_ContentPresenter"/>
 				</Canvas>
-				<ScrollBar Grid.Column="1" Grid.Row="0" Orientation="Vertical"
-						   Initialized="VerticalScrollBarInitialized"/>
-				<ScrollBar Grid.Column="0" Grid.Row="1" Orientation="Horizontal"
-						   Initialized="HorizontalScrollBarInitialized"/>
+				<ScrollBar x:Name="PART_VerticalScrollBar"
+						   Grid.Column="1"/>
+				<!--Value="{TemplateBinding VerticalOffset}"
+						   Maximum="{TemplateBinding ScrollableHeight}"
+						   ViewportSize="{TemplateBinding ViewportHeight}"
+						   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>-->
+				<ScrollBar x:Name="PART_HorizontalScrollBar"
+						   Orientation="Horizontal"
+						   Grid.Row="1"/>
+				<!--Value="{TemplateBinding HorizontalOffset}"
+						   Maximum="{TemplateBinding ScrollableWidth}"
+						   ViewportSize="{TemplateBinding ViewportWidth}"
+						   Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>-->
+
 			</Grid>
 		</ControlTemplate>
 	</ContentControl.Template>
