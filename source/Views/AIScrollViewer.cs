@@ -26,7 +26,7 @@ namespace wpfgui.Views
 	[TemplatePart(Name = AIScrollViewerPart.PART_ContentPresenter, Type = typeof(ContentPresenter))]
 	[TemplatePart(Name = AIScrollViewerPart.PART_HorizontalScrollBar, Type = typeof(ScrollBar))]
 	[TemplatePart(Name = AIScrollViewerPart.PART_VerticalScrollBar, Type = typeof(ScrollBar))]
-	public partial class AIScrollViewer : ContentControl
+	public class AIScrollViewer : ContentControl
 	{
 		public static class AIScrollViewerPart
 		{
@@ -43,8 +43,7 @@ namespace wpfgui.Views
 
 		public AIScrollViewer()
 		{
-			InitializeComponent();
-
+			this.Resources.MergedDictionaries.Add(new Styles.Styles());
 			HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
 			VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
 		}

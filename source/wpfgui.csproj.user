@@ -5,15 +5,9 @@
     <Compile Update="Views\AIImageViewer.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\AIScrollViewer.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\AIImageViewer.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\AIScrollViewer.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
