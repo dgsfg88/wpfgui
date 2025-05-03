@@ -63,10 +63,22 @@ namespace wpfgui.Views
 			DependencyPropertyDescriptor.FromProperty(Canvas.ActualWidthProperty, typeof(ContentControl))
 				.AddValueChanged(MainCanvas, presenterWidthChanged);
 
-			HorizontalScrollBar.SetBinding(ScrollBar.ValueProperty, new Binding(nameof(HorizontalPosition))
+			HorizontalScrollBar.SetBinding(ScrollBar.ValueProperty, new MultiBinding()
 			{
 				Mode = BindingMode.TwoWay,
-				Source = this
+				NotifyOnSourceUpdated = true,
+				NotifyOnTargetUpdated = true,
+				Converter = CallbackConveter.InitMultiValueConverter(calculateScrollValue, calculateScrollPosH),
+				Bindings  =
+				{
+						new Binding(nameof(AIScrollViewer.HorizontalPosition))
+						{ Source = this, Mode = BindingMode.TwoWay },
+						new Binding(nameof(ContentControl.ActualWidth))
+						{ Source = ContentPresenter, Mode = BindingMode.OneWay },
+						new Binding(nameof(ContentControl.ActualWidth))
+						{ Source = MainCanvas, Mode = BindingMode.OneWay },
+
+				}
 			});
 			HorizontalScrollBar.SetBinding(ScrollBar.VisibilityProperty,
 				new MultiBinding()
@@ -82,10 +94,22 @@ namespace wpfgui.Views
 						{ Source = this, Mode = BindingMode.OneWay },
 					}
 				});
-			VerticalScrollBar.SetBinding(ScrollBar.ValueProperty, new Binding(nameof(VerticalPosition))
+			VerticalScrollBar.SetBinding(ScrollBar.ValueProperty, new MultiBinding()
 			{
 				Mode = BindingMode.TwoWay,
-				Source = this
+				NotifyOnSourceUpdated = true,
+				NotifyOnTargetUpdated = true,
+				Converter = CallbackConveter.InitMultiValueConverter(calculateScrollValue, calculateScrollPosV),
+				Bindings =
+				{
+						new Binding(nameof(AIScrollViewer.VerticalPosition))
+						{ Source = this, Mode = BindingMode.TwoWay },
+						new Binding(nameof(ContentControl.ActualHeight))
+						{ Source = ContentPresenter, Mode = BindingMode.OneWay },
+						new Binding(nameof(ContentControl.ActualHeight))
+						{ Source = MainCanvas, Mode = BindingMode.OneWay },
+
+				}
 			});
 			VerticalScrollBar.SetBinding(ScrollBar.VisibilityProperty,
 				new MultiBinding()
@@ -110,8 +134,8 @@ namespace wpfgui.Views
 					Converter = CallbackConveter.InitMultiValueConverter(calculateContentOffset, null),
 					Bindings =
 					{
-						new Binding(nameof(AIScrollViewer.VerticalPosition))
-						{ Source = this, Mode = BindingMode.OneWay },
+						new Binding(nameof(ScrollBar.Value))
+						{ Source = VerticalScrollBar, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualHeight))
 						{ Source = ContentPresenter, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualHeight))
@@ -127,14 +151,65 @@ namespace wpfgui.Views
 					Converter = CallbackConveter.InitMultiValueConverter(calculateContentOffset, null),
 					Bindings =
 					{
-						new Binding(nameof(AIScrollViewer.HorizontalPosition))
-						{ Source = this, Mode = BindingMode.OneWay },
+						new Binding(nameof(ScrollBar.Value))
+						{ Source = HorizontalScrollBar, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualWidth))
 						{ Source = ContentPresenter, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualWidth))
 						{ Source = MainCanvas, Mode = BindingMode.OneWay },
 					}
 				});
+		}
+
+		private object[] calculateScrollPosV(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+		{
+			var outArray = targetTypes.Select(x => Binding.DoNothing).ToArray();
+			if (value is double scrollValue)
+			{
+				var contentSize = ContentPresenter.ActualHeight;
+				var containerSize = MainCanvas.ActualHeight;
+
+				outArray[0] = calculateScrollPos(scrollValue, contentSize, containerSize);
+			}
+			return outArray;
+		}
+
+		private object[] calculateScrollPosH(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+		{
+			var outArray = targetTypes.Select(x => Binding.DoNothing).ToArray();
+			if (value is double scrollValue)
+			{
+				var contentSize = ContentPresenter.ActualWidth;
+				var containerSize = MainCanvas.ActualWidth;
+
+				outArray[0] = calculateScrollPos(scrollValue, contentSize, containerSize);
+			}
+			return outArray;
+		}
+
+		private double calculateScrollPos(double scrollValue, double contentSize, double containerSize)
+		{
+			if (contentSize <= containerSize)
+				return 0.5;
+			else
+				return ((contentSize - containerSize) * scrollValue + containerSize / 2) / contentSize;
+		}
+
+		private object calculateScrollValue(object[] values, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (values.Length > 2 &&
+				values[0] is double scrollPos &&
+				values[1] is double contentSize &&
+				values[2] is double containerSize)
+			{
+				if (contentSize <= containerSize)
+					return 0.5;
+				else
+				{
+					return (scrollPos * contentSize - containerSize / 2) / (contentSize - containerSize);
+				}
+			}
+			return DependencyProperty.UnsetValue;
 		}
 
 		private object calculateScrollBarVisibility(object[] values, Type targetType, object parameter, CultureInfo culture)
@@ -251,7 +326,7 @@ namespace wpfgui.Views
 			if (ContentPresenter != null && MainCanvas != null)
 			{
 				WidthRatio = MainCanvas.ActualWidth / ContentPresenter.ActualWidth;
-				SetScrollBarViewportSize(WidthRatio, HorizontalScrollBar);
+				SetScrollBarViewportSize(WidthRatio, HorizontalScrollBar, HorizontalPositionProperty);
 			}
 		}
 
@@ -260,16 +335,18 @@ namespace wpfgui.Views
 			if (ContentPresenter != null && MainCanvas != null)
 			{
 				HeightRatio = MainCanvas.ActualHeight / ContentPresenter.ActualHeight;
-				SetScrollBarViewportSize(HeightRatio, VerticalScrollBar);
+				SetScrollBarViewportSize(HeightRatio, VerticalScrollBar, VerticalPositionProperty);
 			}
 		}
 
-		private void SetScrollBarViewportSize(double ratio, ScrollBar scrollBar)
+		private void SetScrollBarViewportSize(double ratio, ScrollBar scrollBar,
+			DependencyProperty scrollPosition)
 		{
 			if (ratio >= 1)
 			{
 				scrollBar.Maximum = 0;
 				scrollBar.ViewportSize = 1;
+				SetValue(scrollPosition, 0.5);
 			}
 			else
 			{
