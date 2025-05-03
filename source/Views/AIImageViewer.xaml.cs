@@ -165,8 +165,8 @@ namespace wpfgui.Views
 		private void OnMainGridMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			double change = e.Delta / 1200.0;
-
 			double zoomeLevelNew = change >= 0 ? ZoomValue * (1 + change) : ZoomValue / (1 - change);
+			e.Handled = true;
 
 			if (zoomeLevelNew > 1)
 			{ 
