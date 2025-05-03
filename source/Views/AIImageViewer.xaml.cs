@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -15,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using wpfgui.Converters;
+using static wpfgui.Views.AIScrollViewer;
 
 namespace wpfgui.Views
 {
@@ -23,6 +25,7 @@ namespace wpfgui.Views
 	/// </summary>
 	public partial class AIImageViewer : Control
 	{
+		private AIScrollViewer ImageScrollViewer => GetTemplateChild("ScrollViewer_PART") as AIScrollViewer;
 		/// <summary>
 		/// Main image showed by viewer
 		/// </summary>
@@ -163,8 +166,20 @@ namespace wpfgui.Views
 		{
 			double change = e.Delta / 1200.0;
 
-			if (ZoomValue + change > 1)
-				ZoomValue += change;
+			double zoomeLevelNew = change >= 0 ? ZoomValue * (1 + change) : ZoomValue / (1 - change);
+
+			if (zoomeLevelNew > 1)
+			{ 
+				var uielement = sender as FrameworkElement;
+				var mousePos = e.GetPosition(uielement);
+
+				ImageScrollViewer.HorizontalPosition += (mousePos.X / uielement.Width -
+					ImageScrollViewer.HorizontalPosition) * (1 - ZoomValue / zoomeLevelNew);
+				ImageScrollViewer.VerticalPosition += (mousePos.Y / uielement.Height -
+					ImageScrollViewer.VerticalPosition) * (1 - ZoomValue / zoomeLevelNew);
+
+				ZoomValue = zoomeLevelNew;
+			}
 			else
 				ZoomValue = 1;
 		}
