@@ -36,6 +36,11 @@ namespace wpfgui.Views
 			public const string PART_ContentPresenter = nameof(PART_ContentPresenter);
 		}
 
+		private bool isDragStarted = false;
+		private Point canvasCenter;
+		private Point canvasDragLastPoint = new Point(0, 0);
+		private Point dragStartCenter;
+
 		private ContentPresenter ContentPresenter => GetTemplateChild(AIScrollViewerPart.PART_ContentPresenter) as ContentPresenter;
 		private Canvas MainCanvas => GetTemplateChild(AIScrollViewerPart.PART_ScrollViewerCanvas) as Canvas;
 		private ScrollBar VerticalScrollBar => GetTemplateChild(AIScrollViewerPart.PART_VerticalScrollBar) as ScrollBar;
@@ -159,6 +164,66 @@ namespace wpfgui.Views
 						{ Source = MainCanvas, Mode = BindingMode.OneWay },
 					}
 				});
+
+			MainCanvas.MouseLeftButtonDown += OnMouseLeftButtonDown;
+			MainCanvas.MouseMove += MainCanvas_MouseMove;
+			MainCanvas.MouseLeftButtonUp += MainCanvas_MouseLeftButtonUp; ;
+			MainCanvas.MouseLeave += MainCanvas_MouseLeave;
+		}
+
+		private void MainCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+			=> MainCanvas_MouseLeave(sender, e);
+
+		private void MainCanvas_MouseLeave(object sender, MouseEventArgs e)
+		{
+			if (isDragStarted)
+			{
+				isDragStarted = false;
+				MainCanvas.ReleaseMouseCapture();
+				e.Handled = true;
+			}
+		}
+
+		private void MainCanvas_MouseMove(object sender, MouseEventArgs e)
+		{
+			if (isDragStarted)
+			{
+				if (!IsMouseDragEnabled)
+					isDragStarted = false;
+				else
+				{
+					var curCanvPt = e.GetPosition(MainCanvas);
+					if (Math.Abs((curCanvPt - canvasDragLastPoint).Length) > 1)
+					{
+						var dragDiff = canvasCenter - curCanvPt;
+						dragDiff.X /= ContentPresenter.ActualWidth;
+						dragDiff.Y /= ContentPresenter.ActualHeight;
+
+						canvasDragLastPoint = curCanvPt;
+
+						VerticalPosition = dragStartCenter.Y + dragDiff.Y;
+						HorizontalPosition = dragStartCenter.X + dragDiff.X;
+
+						e.Handled = true;
+					}
+				}
+			}
+		}
+
+		private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			if (!isDragStarted && IsMouseDragEnabled)
+			{
+				isDragStarted = true;
+				canvasCenter = e.GetPosition(MainCanvas);
+				canvasDragLastPoint = e.GetPosition(MainCanvas);
+
+				dragStartCenter = new Point(HorizontalPosition, VerticalPosition);
+
+				MainCanvas.CaptureMouse();
+
+				e.Handled = true;
+			}
 		}
 
 		private object[] calculateScrollPosV(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -349,6 +414,19 @@ namespace wpfgui.Views
 			get { return (double)GetValue(HeightRatioProperty); }
 			protected set { SetValue(HeightRatioPropertyKey, value); }
 		}
+
+
+
+		public bool IsMouseDragEnabled
+		{
+			get { return (bool)GetValue(IsMouseDragEnabledProperty); }
+			set { SetValue(IsMouseDragEnabledProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for IsMouseDragEnabled.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty IsMouseDragEnabledProperty =
+			DependencyProperty.Register(nameof(IsMouseDragEnabled), typeof(bool), 
+				typeof(AIScrollViewer), new PropertyMetadata(true));
 
 		private void presenterWidthChanged(object sender, EventArgs e)
 		{
