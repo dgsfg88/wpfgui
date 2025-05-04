@@ -277,7 +277,33 @@ namespace wpfgui.Views
 		// Using a DependencyProperty as the backing store for VerticalPosition.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty VerticalPositionProperty =
 			DependencyProperty.Register(nameof(VerticalPosition), typeof(double), typeof(AIScrollViewer),
-				new PropertyMetadata(0.5));
+				new PropertyMetadata(0.5, null, coerceVerticalPosition));
+
+		private static object coerceVerticalPosition(DependencyObject d, object baseValue)
+			=> coercePosition(d, baseValue, ActualHeightProperty);
+
+		private static double coercePosition(DependencyObject d, object baseValue, 
+			DependencyProperty lengthProperty)
+		{
+			if (d is AIScrollViewer v && baseValue is double value &&
+				v.ContentPresenter.GetValue(lengthProperty) is double contentSize &&
+				v.MainCanvas.GetValue(lengthProperty) is double containerSize)
+			{ 
+				var min = v.calculateScrollPos(0, contentSize,
+					containerSize);
+				var max = v.calculateScrollPos(1, contentSize,
+					containerSize);
+
+				if (double.IsNaN(value) || double.IsInfinity(value))
+					return 0.5;
+				else if (value < min)
+					return min;
+				else if (value > max)
+					return max;
+				return value;
+			}
+			return 0.5;
+		}
 
 		public double HorizontalPosition
 		{
@@ -287,7 +313,10 @@ namespace wpfgui.Views
 
 		// Using a DependencyProperty as the backing store for HorizontalPosition.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty HorizontalPositionProperty =
-			DependencyProperty.Register(nameof(HorizontalPosition), typeof(double), typeof(AIScrollViewer), new PropertyMetadata(0.5));
+			DependencyProperty.Register(nameof(HorizontalPosition), typeof(double), typeof(AIScrollViewer), new PropertyMetadata(0.5, null, coerceHorizontalPosition));
+
+		private static object coerceHorizontalPosition(DependencyObject d, object baseValue)
+			=> coercePosition(d, baseValue, ActualWidthProperty);
 
 		private static readonly DependencyPropertyKey WidthRatioPropertyKey
 		= DependencyProperty.RegisterReadOnly(
