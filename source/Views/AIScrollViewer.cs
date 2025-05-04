@@ -134,8 +134,8 @@ namespace wpfgui.Views
 					Converter = CallbackConveter.InitMultiValueConverter(calculateContentOffset, null),
 					Bindings =
 					{
-						new Binding(nameof(ScrollBar.Value))
-						{ Source = VerticalScrollBar, Mode = BindingMode.OneWay },
+						new Binding(nameof(VerticalPosition))
+						{ Source = this, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualHeight))
 						{ Source = ContentPresenter, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualHeight))
@@ -151,8 +151,8 @@ namespace wpfgui.Views
 					Converter = CallbackConveter.InitMultiValueConverter(calculateContentOffset, null),
 					Bindings =
 					{
-						new Binding(nameof(ScrollBar.Value))
-						{ Source = HorizontalScrollBar, Mode = BindingMode.OneWay },
+						new Binding(nameof(HorizontalPosition))
+						{ Source = this, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualWidth))
 						{ Source = ContentPresenter, Mode = BindingMode.OneWay },
 						new Binding(nameof(ContentControl.ActualWidth))
@@ -250,7 +250,7 @@ namespace wpfgui.Views
 				}
 				else
 				{
-					pos = -scrollBarPosition * pixelDiff;
+					pos = -(scrollBarPosition * contentSize - containerSize / 2);
 				}
 				return pos;
 			}
